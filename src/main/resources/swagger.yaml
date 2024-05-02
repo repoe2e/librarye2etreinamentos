@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Biblioteca - E2E Treinamentos
+  description: |-
+    Este é um servidor de amostra para um sistema de biblioteca baseado na especificação OpenAPI 3.0. Você pode encontrar mais informações sobre
+    Swagger em [https://swagger.io](https://swagger.io). O sistema da biblioteca da E2E Treinamentos é usado para execução de testes em aula.
+    
+    Algumas informações úteis:
+    - [Repositório da E2E Treinamentos](https://github.com/e2etreinamentos)
+    - [Definição da API do sistema de biblioteca](https://github.com/e2etreinamentos/library-api/blob/main/openapi.yaml)
+  termsOfService: http://e2etreinamentos.com/terms/
+  contact:
+    email: contato@e2etreinamentos.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Saiba mais sobre o Swagger
+  url: http://swagger.io
+
+servers:
+  - url: http://localhost:8085/api
+
+paths:
+  /livros:
+    get:
+      summary: Retorna todos os livros
+      operationId: listarLivros
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Cadastra um novo livro
+      operationId: cadastrarLivro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livros'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+
+  /livros/{id}:
+    get:
+      summary: Retorna um livro pelo ID
+      operationId: listarLivroPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do livro
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+    put:
+      summary: Atualiza um livro existente
+      operationId: atualizarLivro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do livro
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livros'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+    delete:
+      summary: Remove um livro pelo ID
+      operationId: removerLivro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do livro
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+
+components:
+  schemas:
+    Livros:
+      type: object
+      properties:
+        id:
+          type: integer
+        titulo:
+          type: string
+        autor:
+          type: string
+        anoPublicacao:
+          type: integer
+      required:
+        - titulo
+        - autor
+        - anoPublicacao
