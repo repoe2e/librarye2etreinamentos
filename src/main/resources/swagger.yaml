@@ -103,15 +103,20 @@ components:
     Livros:
       type: object
       properties:
-        id:
-          type: integer
         titulo:
           type: string
         autor:
           type: string
+        quantidadeEmEstoque:
+          type: integer
+        editora:
+          type: string
         anoPublicacao:
           type: integer
+        genero:
+          type: string
       required:
         - titulo
         - autor
+        - quantidadeEmEstoque
         - anoPublicacao
