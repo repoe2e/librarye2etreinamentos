@@ -6,8 +6,8 @@ info:
     Swagger em [https://swagger.io](https://swagger.io). O sistema da biblioteca da E2E Treinamentos é usado para execução de testes em aula.
     
     Algumas informações úteis:
-    - [Repositório da E2E Treinamentos](https://github.com/e2etreinamentos)
-    - [Definição da API do sistema de biblioteca](https://github.com/e2etreinamentos/library-api/blob/main/openapi.yaml)
+    - [Repositório da E2E Treinamentos](https://github.com/repoe2e/librarye2etreinamentos)
+ 
   termsOfService: http://e2etreinamentos.com/terms/
   contact:
     email: contato@e2etreinamentos.com
