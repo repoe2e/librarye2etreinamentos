@@ -30,6 +30,7 @@ paths:
       responses:
         '200':
           description: OK
+  /livros/cadastrar:
     post:
       summary: Cadastra um novo livro
       operationId: cadastrarLivro
@@ -38,12 +39,29 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Livros'
+              $ref: '#/components/schemas/Livro'
       responses:
         '201':
           description: Created
         '400':
           description: Bad Request
+  /livros/cadastrar-em-massa:
+    post:
+      summary: Cadastrar mais de um livro
+      operationId: cadastrarLivroEmMassa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Livro'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request        
 
   /livros/{id}:
     get:
@@ -76,7 +94,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Livros'
+              $ref: '#/components/schemas/Livro'
       responses:
         '200':
           description: OK
@@ -100,7 +118,7 @@ paths:
 
 components:
   schemas:
-    Livros:
+    Livro:
       type: object
       properties:
         titulo:
