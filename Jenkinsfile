@@ -24,32 +24,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Script PowerShell para iniciar a aplicação em segundo plano
-                    def psScript = '''
-                    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-                    $startInfo.FileName = "mvn.cmd"
-                    $startInfo.Arguments = "spring-boot:run"
-                    $startInfo.RedirectStandardOutput = $true
-                    $startInfo.RedirectStandardError = $true
-                    $startInfo.UseShellExecute = $false
-                    $startInfo.CreateNoWindow = $true
-                    $process = New-Object System.Diagnostics.Process
-                    $process.StartInfo = $startInfo
-                    $process.Start() | Out-Null
-                    $process.WaitForInputIdle()
-                    Start-Sleep -s 20
-                    $process.Id
+                    // Use PowerShell para iniciar a aplicação em segundo plano
+                    bat '''
+                        powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c mvn spring-boot:run > target\\spring.log 2>&1' -NoNewWindow"
                     '''
-                    def processId = bat(script: "powershell -Command \"${psScript}\"", returnStdout: true).trim()
-                    
-                    // Verifique se o servidor está rodando
-                    bat 'netstat -an | findstr "8085"' // Verifique se a porta 8085 está em uso
-                    bat 'tasklist | findstr "java"' // Verifique se o processo Java está rodando
-                    bat 'type target\\spring.log || more target\\spring.log' // Mostre o conteúdo do log da aplicação
-                    bat 'curl http://127.0.0.1:8085' // Teste se a aplicação está respondendo
-
-                    // Salve o PID do processo para futuras operações (opcional)
-                    writeFile file: 'process.pid', text: processId
+                    // Aguarde 20 segundos para garantir que o servidor inicie
+                    bat 'ping -n 20 127.0.0.1 > nul'
+                    // Verifique se a porta 8085 está em uso
+                    bat 'netstat -an | findstr "8085"'
+                    // Verifique se o processo Java está rodando
+                    bat 'tasklist | findstr "java"'
+                    // Mostre o conteúdo do log da aplicação
+                    bat 'type target\\spring.log || more target\\spring.log'
+                    // Teste se a aplicação está respondendo
+                    bat 'curl http://127.0.0.1:8085'
                 }
             }
         }
