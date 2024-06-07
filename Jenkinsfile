@@ -6,9 +6,8 @@ pipeline {
         git 'GIT' // Nome configurado para o Git
     }
     environment {
-        SERVICE_NAME = "LibraryE2EApp"
-        LOG_PATH = "C:\\ProgramData\\Jenkins\\workspace\\librarye2etreinamentos\\target\\spring.log"
-        WORKSPACE_DIR = "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos"
+        NSSM_PATH = 'C:\\nssm-2.24\\win64\\nssm.exe'
+        SERVICE_NAME = 'LibraryE2EApp'
     }
     stages {
         stage('Checkout') {
@@ -29,26 +28,37 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Comandos para parar e remover o serviço existente
-                    bat "nssm stop ${env.SERVICE_NAME}"
-                    bat "nssm remove ${env.SERVICE_NAME} confirm"
+                    def logPath = "${WORKSPACE}\\target\\spring.log"
+                    def workspaceDir = "${WORKSPACE}"
 
-                    // Comando para instalar o serviço com nssm
-                    bat """
-                        nssm install ${env.SERVICE_NAME} "mvn.cmd" "spring-boot:run"
-                        nssm set ${env.SERVICE_NAME} AppStdout ${env.LOG_PATH}
-                        nssm set ${env.SERVICE_NAME} AppStderr ${env.LOG_PATH}
-                        nssm set ${env.SERVICE_NAME} AppDirectory ${env.WORKSPACE_DIR}
-                        nssm start ${env.SERVICE_NAME}
-                    """
+                    // Stop the existing service
+                    bat "${env.NSSM_PATH} stop ${env.SERVICE_NAME} || exit 0"
 
-                    // Aguarde 20 segundos para garantir que o servidor inicie
+                    // Remove the existing service
+                    bat "${env.NSSM_PATH} remove ${env.SERVICE_NAME} confirm || exit 0"
+
+                    // Install the service
+                    bat "${env.NSSM_PATH} install ${env.SERVICE_NAME} mvn.cmd spring-boot:run"
+
+                    // Configure the service
+                    bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppStdout ${logPath}"
+                    bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppStderr ${logPath}"
+                    bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppDirectory ${workspaceDir}"
+
+                    // Start the service
+                    bat "${env.NSSM_PATH} start ${env.SERVICE_NAME}"
+
+                    // Wait for the service to start
                     bat 'ping -n 20 127.0.0.1 > nul'
-                    // Verifique se a porta 8085 está em uso
+
+                    // Check if the service is running
                     bat 'netstat -an | findstr "8085"'
-                    // Verifique se o processo Java está rodando
                     bat 'tasklist | findstr "java"'
-                    // Teste se a aplicação está respondendo
+                    
+                    // Show the log
+                    bat "type ${logPath} || more ${logPath}"
+
+                    // Test if the application is responding
                     bat 'curl http://127.0.0.1:8085'
                 }
             }
