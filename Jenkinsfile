@@ -24,7 +24,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 bat 'start "" /B mvn spring-boot:run'
-                bat 'ping -n 10 127.0.0.1 > nul' // Aguarde alguns segundos para garantir que o servidor inicie
+                bat 'ping -n 20 127.0.0.1 > nul' // Aguarde alguns segundos para garantir que o servidor inicie
             }
         }
     }
