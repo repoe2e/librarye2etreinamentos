@@ -23,7 +23,8 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                bat 'start /B mvn spring-boot:run'
+                bat 'start "" /B mvn spring-boot:run'
+                bat 'timeout /t 10' // Aguarde alguns segundos para garantir que o servidor inicie
             }
         }
     }
