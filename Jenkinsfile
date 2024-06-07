@@ -34,8 +34,6 @@ pipeline {
                     bat 'netstat -an | findstr "8085"'
                     // Verifique se o processo Java está rodando
                     bat 'tasklist | findstr "java"'
-                    // Mostre o conteúdo do log da aplicação
-                    bat 'type target\\spring.log || more target\\spring.log'
                     // Teste se a aplicação está respondendo
                     bat 'curl http://127.0.0.1:8085'
                 }
