@@ -28,6 +28,8 @@ pipeline {
                 bat 'netstat -an | findstr "8085"' // Verifique se a porta 8085 está em uso
                 bat 'tasklist | findstr "java"' // Verifique se o processo Java está rodando
                 bat 'type target\\spring.log || more target\\spring.log' // Mostre o conteúdo do log da aplicação
+                // Adicione um comando para testar a acessibilidade da aplicação
+                bat 'curl http://127.0.0.1:8085' // Teste se a aplicação está respondendo
             }
         }
     }
