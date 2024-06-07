@@ -3,11 +3,12 @@ pipeline {
     tools {
         maven 'MAVEN' // Nome configurado para o Maven
         jdk 'JDK17' // Nome configurado para o JDK
+        git 'GIT' // Nome configurado para o Git
     }
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/repoe2e/librarye2etreinamentos.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/librarye2etreinamentos.git']]])
             }
         }
         stage('Build') {
