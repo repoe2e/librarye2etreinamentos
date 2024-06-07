@@ -38,12 +38,16 @@ pipeline {
                     bat "${env.NSSM_PATH} remove ${env.SERVICE_NAME} confirm || exit 0"
 
                     // Install the service
-                    bat "${env.NSSM_PATH} install ${env.SERVICE_NAME} mvn.cmd spring-boot:run"
+                    bat "${env.NSSM_PATH} install ${env.SERVICE_NAME} mvn.cmd 'spring-boot:run'"
 
                     // Configure the service
                     bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppStdout ${logPath}"
                     bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppStderr ${logPath}"
                     bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} AppDirectory ${workspaceDir}"
+
+                    // Set NSSM parameters to ensure it starts properly
+                    bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} Start SERVICE_DEMAND_START"
+                    bat "${env.NSSM_PATH} set ${env.SERVICE_NAME} Type SERVICE_WIN32_OWN_PROCESS"
 
                     // Start the service
                     bat "${env.NSSM_PATH} start ${env.SERVICE_NAME}"
