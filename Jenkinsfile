@@ -24,9 +24,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Use PowerShell para iniciar a aplicação em segundo plano
+                    // Use `start /B` para iniciar a aplicação em segundo plano
                     bat '''
-                        powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c mvn spring-boot:run > target\\spring.log 2>&1' -NoNewWindow"
+                        start "" /B powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c mvn spring-boot:run' -NoNewWindow"
                     '''
                     // Aguarde 20 segundos para garantir que o servidor inicie
                     bat 'ping -n 20 127.0.0.1 > nul'
