@@ -3,7 +3,6 @@ pipeline {
     tools {
         maven 'MAVEN' // Nome configurado para o Maven
         jdk 'JDK17' // Nome configurado para o JDK
-        git 'GIT' // Nome configurado para o Git
     }
     stages {
         stage('Checkout') {
@@ -24,8 +23,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Use `start /B` para iniciar a aplicação em segundo plano
-                    bat 'start /B mvn spring-boot:run > target\\spring.log 2>&1'
+                    // Use `powershell` para iniciar a aplicação em segundo plano
+                    bat 'powershell Start-Process -NoNewWindow -FilePath "mvn.cmd" -ArgumentList "spring-boot:run"'
                     bat 'ping -n 20 127.0.0.1 > nul' // Aguarde 20 segundos para garantir que o servidor inicie
                     bat 'netstat -an | findstr "8085"' // Verifique se a porta 8085 está em uso
                     bat 'tasklist | findstr "java"' // Verifique se o processo Java está rodando
