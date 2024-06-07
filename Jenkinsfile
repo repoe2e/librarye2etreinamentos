@@ -24,9 +24,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Use `start /B` para iniciar a aplicação em segundo plano
+                    // Use PowerShell para iniciar a aplicação em segundo plano
                     bat '''
-                        start "" /B powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c mvn spring-boot:run' -NoNewWindow"
+                        powershell -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c mvn spring-boot:run > target\\spring.log 2>&1' -NoNewWindow -PassThru | Out-Null"
                     '''
                     // Aguarde 20 segundos para garantir que o servidor inicie
                     bat 'ping -n 20 127.0.0.1 > nul'
@@ -34,6 +34,8 @@ pipeline {
                     bat 'netstat -an | findstr "8085"'
                     // Verifique se o processo Java está rodando
                     bat 'tasklist | findstr "java"'
+                    // Mostre o conteúdo do log da aplicação
+                    bat 'type target\\spring.log || more target\\spring.log'
                     // Teste se a aplicação está respondendo
                     bat 'curl http://127.0.0.1:8085'
                 }
