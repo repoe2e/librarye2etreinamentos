@@ -23,8 +23,11 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                bat 'start "" /B mvn spring-boot:run'
-                bat 'ping -n 20 127.0.0.1 > nul' // Aguarde alguns segundos para garantir que o servidor inicie
+                bat 'start "" /B mvn spring-boot:run > target/spring.log 2>&1'
+                bat 'ping -n 20 127.0.0.1 > nul' // Aguarde 20 segundos para garantir que o servidor inicie
+                bat 'netstat -an | findstr "8085"' // Verifique se a porta 8085 está em uso
+                bat 'tasklist | findstr "java"' // Verifique se o processo Java está rodando
+                bat 'type target/spring.log' // Mostre o conteúdo do log da aplicação
             }
         }
     }
