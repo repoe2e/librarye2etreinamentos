@@ -28,16 +28,6 @@ pipeline {
         }
     }
     post {
-        always {
-            script {
-                try {
-                    bat 'mvn spring-boot:stop'
-                } catch (Exception e) {
-                    echo 'Failed to stop the application'
-                }
-            }
-            echo 'Build completed'
-        }
         success {
             echo 'Build successful'
         }
