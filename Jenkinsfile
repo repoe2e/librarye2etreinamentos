@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/librarye2etreinamentos.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library-rest.git']]])
             }
         }
         stage('Build') {
@@ -22,6 +22,11 @@ pipeline {
         stage('Test') {
             steps {
                 bat 'mvn test'
+            }
+        }
+        stage('API Tests') {
+            steps {
+                bat 'mvn test -Dtest=ListarLivrosTest'
             }
         }
         stage('Deploy') {
