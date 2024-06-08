@@ -13,30 +13,36 @@ pipeline {
     }
     stage('Build') {
       steps {
-        withMaven(
-          maven: 'MAVEN',
-          mavenLocalRepo: '.repository',
-          mavenSettingsConfig: 'my-maven-settings'
-        ) {
-          bat 'mvn clean install'
+        configFileProvider([configFile(fileId: 'my-maven-settings', variable: 'MAVEN_SETTINGS')]) {
+          withMaven(
+            maven: 'MAVEN',
+            mavenLocalRepo: '.repository',
+            mavenSettingsConfig: 'my-maven-settings'
+          ) {
+            bat 'mvn clean install --settings %MAVEN_SETTINGS%'
+          }
         }
       }
     }
     stage('Test') {
       steps {
-        withMaven(
-          maven: 'MAVEN',
-          mavenLocalRepo: '.repository',
-          mavenSettingsConfig: 'my-maven-settings'
-        ) {
-          bat 'mvn test'
+        configFileProvider([configFile(fileId: 'my-maven-settings', variable: 'MAVEN_SETTINGS')]) {
+          withMaven(
+            maven: 'MAVEN',
+            mavenLocalRepo: '.repository',
+            mavenSettingsConfig: 'my-maven-settings'
+          ) {
+            bat 'mvn test --settings %MAVEN_SETTINGS%'
+          }
         }
       }
     }
     stage('Deploy') {
       steps {
         script {
-        
+          // Pare o serviço existente se necessário
+          bat 'powershell -Command "Stop-Process -Name java -Force" || exit 0'
+
           // Inicie a aplicação Spring Boot usando o script PowerShell
           bat 'powershell -File C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\start-app.ps1'
 
@@ -44,6 +50,9 @@ pipeline {
           bat 'ping -n 20 127.0.0.1 > nul'
 
           // Verifique se a aplicação está rodando
+          bat 'netstat -an | findstr "8085"'
+          bat 'tasklist | findstr "java"'
+          bat 'type C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\target\\spring.log || more C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\target\\spring.log'
           bat 'curl http://127.0.0.1:8085'
         }
       }
