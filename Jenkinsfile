@@ -9,26 +9,28 @@ pipeline {
         PATH = "${env.PATH};${env.NSSM_PATH}"
     }
     stages {
-        stage('Checkout') {
+        stage('Checkout Application') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git']]])
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git', credentialsId: 'github-token']]])
+                }
             }
         }
-        stage('Build') {
+        stage('Build Application') {
             steps {
                 bat 'mvn clean install'
             }
         }
-        stage('Test') {
+        stage('Unit Tests') {
             steps {
                 bat 'mvn test'
             }
         }
-        stage('Deploy') {
+        stage('Deploy Application') {
             steps {
                 script {
                     // Use `powershell` para parar o serviço
-                    bat 'powershell -Command "Stop-Service -Name 'MyAppService' -Force"'
+                    bat 'powershell -Command "Stop-Service -Name \'MyAppService\' -Force"'
                     
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
@@ -43,7 +45,15 @@ pipeline {
                     
                     // Iniciar o novo serviço
                     bat 'nssm start MyAppService'
+                    
+                    // Aguardar o serviço iniciar
+                    bat 'ping -n 20 127.0.0.1 > nul'
                 }
+            }
+        }
+        stage('Trigger API Tests') {
+            steps {
+                build job: 'library-rest-api-tests', wait: false
             }
         }
     }
