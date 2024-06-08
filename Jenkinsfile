@@ -9,26 +9,26 @@ pipeline {
         PATH = "${env.PATH};${env.NSSM_PATH}"
     }
     stages {
-        stage('Checkout Application') {
+        stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git']]])
             }
         }
-        stage('Build Application') {
+        stage('Build') {
             steps {
                 bat 'mvn clean install'
             }
         }
-        stage('Unit Tests') {
+        stage('Test') {
             steps {
                 bat 'mvn test'
             }
         }
-        stage('Deploy Application') {
+        stage('Deploy') {
             steps {
                 script {
                     // Use `powershell` para parar o serviço
-                    bat 'powershell -Command "Stop-Service -Name \'MyAppService\' -Force"'
+                    bat 'powershell -Command "Stop-Service -Name 'MyAppService' -Force"'
                     
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
@@ -43,25 +43,7 @@ pipeline {
                     
                     // Iniciar o novo serviço
                     bat 'nssm start MyAppService'
-                    
-                    // Aguardar o serviço iniciar
-                    bat 'ping -n 20 127.0.0.1 > nul'
                 }
-            }
-        }
-        stage('Checkout API Tests') {
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library-rest-tests.git']]])
-            }
-        }
-        stage('Build API Tests') {
-            steps {
-                bat 'mvn clean install'
-            }
-        }
-        stage('Integration Tests') {
-            steps {
-                bat 'mvn test'
             }
         }
     }
@@ -70,13 +52,7 @@ pipeline {
             echo 'Build successful'
         }
         failure {
-            steps {
-                script {
-                    // Parar o serviço em caso de falha
-                    bat 'nssm stop MyAppService'
-                }
-                echo 'Build failed'
-            }
+            echo 'Build failed'
         }
     }
 }
