@@ -1,8 +1,12 @@
 pipeline {
     agent any
     tools {
-        maven 'MAVEN' // Nome configurado para o Maven
-        jdk 'JDK17' // Nome configurado para o JDK
+        maven 'MAVEN'
+        jdk 'JDK17'
+    }
+    environment {
+        NSSM_PATH = 'C:\\nssm-2.24\\win64'
+        PATH = "${env.PATH};${env.NSSM_PATH}"
     }
     stages {
         stage('Checkout') {
@@ -23,8 +27,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Parar o serviço existente
-                    bat 'nssm stop MyAppService || exit 0'
+                    // Use `powershell` para parar o serviço
+                    bat 'powershell -Command "Stop-Service -Name \'MyAppService\' -Force"'
                     
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
