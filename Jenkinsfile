@@ -9,40 +9,22 @@ pipeline {
         PATH = "${env.PATH};${env.NSSM_PATH}"
     }
     stages {
-        stage('Checkout') {
+        stage('Checkout Application') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library-rest.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git']]])
             }
         }
-        stage('Build') {
+        stage('Build Application') {
             steps {
                 bat 'mvn clean install'
             }
         }
-        stage('Start Service') {
+        stage('Unit Tests') {
             steps {
-                script {
-                    // Start the service using nssm
-                    bat 'nssm start MyAppService'
-                    // Wait for the service to start
-                    bat 'ping -n 20 127.0.0.1 > nul'
-                }
+                bat 'mvn test'
             }
         }
-        stage('API Tests') {
-            steps {
-                bat 'mvn test -Dtest=ListarLivrosTest'
-            }
-        }
-        stage('Stop Service') {
-            steps {
-                script {
-                    // Stop the service after tests
-                    bat 'nssm stop MyAppService'
-                }
-            }
-        }
-        stage('Deploy') {
+        stage('Deploy Application') {
             steps {
                 script {
                     // Use `powershell` para parar o serviço
@@ -61,7 +43,25 @@ pipeline {
                     
                     // Iniciar o novo serviço
                     bat 'nssm start MyAppService'
+                    
+                    // Aguardar o serviço iniciar
+                    bat 'ping -n 20 127.0.0.1 > nul'
                 }
+            }
+        }
+        stage('Checkout API Tests') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library-rest-tests.git']]])
+            }
+        }
+        stage('Build API Tests') {
+            steps {
+                bat 'mvn clean install'
+            }
+        }
+        stage('Integration Tests') {
+            steps {
+                bat 'mvn test'
             }
         }
     }
@@ -70,7 +70,13 @@ pipeline {
             echo 'Build successful'
         }
         failure {
-            echo 'Build failed'
+            steps {
+                script {
+                    // Parar o serviço em caso de falha
+                    bat 'nssm stop MyAppService'
+                }
+                echo 'Build failed'
+            }
         }
     }
 }
