@@ -19,14 +19,27 @@ pipeline {
                 bat 'mvn clean install'
             }
         }
-        stage('Test') {
+        stage('Start Service') {
             steps {
-                bat 'mvn test'
+                script {
+                    // Start the service using nssm
+                    bat 'nssm start MyAppService'
+                    // Wait for the service to start
+                    bat 'ping -n 20 127.0.0.1 > nul'
+                }
             }
         }
         stage('API Tests') {
             steps {
                 bat 'mvn test -Dtest=ListarLivrosTest'
+            }
+        }
+        stage('Stop Service') {
+            steps {
+                script {
+                    // Stop the service after tests
+                    bat 'nssm stop MyAppService'
+                }
             }
         }
         stage('Deploy') {
