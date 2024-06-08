@@ -23,13 +23,22 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Use `powershell` para iniciar a aplicação em segundo plano
-                    bat 'powershell Start-Process -NoNewWindow -FilePath "mvn.cmd" -ArgumentList "spring-boot:run"'
-                    bat 'ping -n 20 127.0.0.1 > nul' // Aguarde 20 segundos para garantir que o servidor inicie
-                    bat 'netstat -an | findstr "8085"' // Verifique se a porta 8085 está em uso
-                    bat 'tasklist | findstr "java"' // Verifique se o processo Java está rodando
-                    bat 'type target\\spring.log || more target\\spring.log' // Mostre o conteúdo do log da aplicação
-                    bat 'curl http://127.0.0.1:8085' // Teste se a aplicação está respondendo
+                    // Parar o serviço existente
+                    bat 'nssm stop MyAppService || exit 0'
+                    
+                    // Remover o serviço existente
+                    bat 'nssm remove MyAppService confirm || exit 0'
+                    
+                    // Instalar o novo serviço
+                    bat 'nssm install MyAppService "C:\\Program Files\\Java\\jdk-17\\bin\\java.exe" -jar "C:\\Desenvolvimento\\library_e2e\\target\\library_e2e-0.0.1-SNAPSHOT.jar"'
+                    
+                    // Configurar o serviço
+                    bat 'nssm set MyAppService AppDirectory "C:\\Desenvolvimento\\library_e2e"'
+                    bat 'nssm set MyAppService AppStdout "C:\\Desenvolvimento\\library_e2e\\logs\\stdout.log"'
+                    bat 'nssm set MyAppService AppStderr "C:\\Desenvolvimento\\library_e2e\\logs\\stderr.log"'
+                    
+                    // Iniciar o novo serviço
+                    bat 'nssm start MyAppService'
                 }
             }
         }
