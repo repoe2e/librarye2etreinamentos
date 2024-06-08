@@ -27,9 +27,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Use `powershell` para parar o serviço
-                    bat 'powershell -Command "Stop-Service -Name 'MyAppService' -Force"'
-                    
+                                      
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
                     
