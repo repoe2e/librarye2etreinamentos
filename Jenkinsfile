@@ -11,7 +11,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git']]])
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git', credentialsId: 'github-token']]])
+                }
             }
         }
         stage('Build') {
@@ -28,7 +30,7 @@ pipeline {
             steps {
                 script {
                     // Use `powershell` para parar o serviço
-                    bat 'powershell -Command "Stop-Service -Name 'MyAppService' -Force"'
+                    bat 'powershell -Command "Stop-Service -Name \'MyAppService\' -Force"'
                     
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
