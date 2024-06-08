@@ -11,9 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                sshagent(['github-ssh-key']) {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'git@github.com:repoe2e/library_e2etreinamentos.git']]])
-                }
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/library_e2etreinamentos.git']]])
             }
         }
         stage('Build') {
@@ -30,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Use `powershell` para parar o serviço
-                    bat 'powershell -Command "Stop-Service -Name \'MyAppService\' -Force"'
+                    bat 'powershell -Command "Stop-Service -Name 'MyAppService' -Force"'
                     
                     // Remover o serviço existente
                     bat 'nssm remove MyAppService confirm || exit 0'
