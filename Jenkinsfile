@@ -1,69 +1,44 @@
 pipeline {
-  agent any
-  tools {
-    maven 'MAVEN' // Nome configurado para o Maven
-    jdk 'JDK17' // Nome configurado para o JDK
-    git 'GIT' // Nome configurado para o Git
-  }
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/librarye2etreinamentos.git']]])
-      }
+    agent any
+    tools {
+        maven 'MAVEN' // Nome configurado para o Maven
+        jdk 'JDK17' // Nome configurado para o JDK
+        git 'GIT' // Nome configurado para o Git
     }
-    stage('Build') {
-      steps {
-        configFileProvider([configFile(fileId: 'my-maven-settings', variable: 'MAVEN_SETTINGS')]) {
-          withMaven(
-            maven: 'MAVEN',
-            mavenLocalRepo: '.repository',
-            mavenSettingsConfig: 'my-maven-settings'
-          ) {
-            bat 'mvn clean install --settings %MAVEN_SETTINGS%'
-          }
+    environment {
+        NSSM_PATH = 'C:\\nssm-2.24\\win64\\nssm.exe'
+        SERVICE_NAME = 'LibraryE2EApp'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/repoe2e/librarye2etreinamentos.git']]])
+            }
         }
-      }
-    }
-    stage('Test') {
-      steps {
-        configFileProvider([configFile(fileId: 'my-maven-settings', variable: 'MAVEN_SETTINGS')]) {
-          withMaven(
-            maven: 'MAVEN',
-            mavenLocalRepo: '.repository',
-            mavenSettingsConfig: 'my-maven-settings'
-          ) {
-            bat 'mvn test --settings %MAVEN_SETTINGS%'
-          }
+        stage('Build') {
+            steps {
+                bat 'mvn clean install'
+            }
         }
-      }
-    }
-    stage('Deploy') {
-      steps {
-        script {
-          // Pare o serviço existente se necessário
-          bat 'powershell -Command "Stop-Process -Name java -Force" || exit 0'
-
-          // Inicie a aplicação Spring Boot usando o script PowerShell
-          bat 'powershell -File C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\start-app.ps1'
-
-          // Aguarde alguns segundos para garantir que a aplicação inicie
-          bat 'ping -n 20 127.0.0.1 > nul'
-
-          // Verifique se a aplicação está rodando
-          bat 'netstat -an | findstr "8085"'
-          bat 'tasklist | findstr "java"'
-          bat 'type C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\target\\spring.log || more C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\librarye2etreinamentos\\target\\spring.log'
-          bat 'curl http://127.0.0.1:8085'
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
         }
-      }
+        stage('Deploy') {
+            steps {
+                script {
+                  
+                }
+            }
+        }
     }
-  }
-  post {
-    success {
-      echo 'Build successful'
+    post {
+        success {
+            echo 'Build successful'
+        }
+        failure {
+            echo 'Build failed'
+        }
     }
-    failure {
-      echo 'Build failed'
-    }
-  }
 }
